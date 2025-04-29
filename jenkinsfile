@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+    triggers{
+            githubPush()
+            }
+
+    tools {
+            maven 'maven3'
+            jdk 'jdk21'
+        }
+    environment {
+        COMPOSE_FILE = 'docker-compose.yml'
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                // Explicitly specify the branch as 'main'
+                git branch: 'maze_runner_game', url: 'https://github.com/LazyCoderForU/docker-learning-only-python.git'
+            }
+        }
+
+        stage('Build Maven Project') {
+            steps {
+                bat 'mvn clean package'
+            }
+        }
+
+        stage('Rebuild Docker Containers') {
+            steps {
+                bat 'docker compose down'
+                bat 'docker compose up --build -d'
+            }
+        }
+    }
+}

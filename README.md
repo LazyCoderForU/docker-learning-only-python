@@ -89,8 +89,105 @@ The application is designed using a microservices architecture with the followin
 │   ├── Include/
 ```
 
-## How to Contribute
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix.
-3. Commit your changes and push them to your fork.
-4. Submit a pull request with a detailed description of your changes.
+## Teaching Notes: Building the Maze Runner Game from Scratch
+
+### **Objective**
+Teach students how to build a web-based interactive game using Python, Flask, Docker, and modern web technologies. The project will demonstrate the use of microservices architecture, containerization, and frontend-backend integration.
+
+---
+
+### **Lesson Plan**
+
+#### **1. Introduction to the Project**
+- Explain the objective of the Maze Runner Game:
+  - A player navigates through a randomly generated maze to reach the goal.
+  - The game uses Flask for backend logic and HTML/CSS/JavaScript for the frontend.
+  - Docker is used for containerization, and the project follows a microservices architecture.
+
+#### **2. Setting Up the Environment**
+- **Install Python**: Ensure Python 3.10 or later is installed.
+- **Set Up a Virtual Environment**:
+  ```bash
+  python -m venv myvenv
+  source myvenv/bin/activate  # On Windows: myvenv\Scripts\activate
+  ```
+- **Install Flask and Dependencies**:
+  ```bash
+  pip install flask flask-socketio
+  ```
+
+#### **3. Backend Development**
+- **Game Logic Service**:
+  - Create `game_logic.py` to handle maze generation, player movement, and game completion logic.
+  - Implement random maze generation with validation to ensure a valid path exists.
+  - Use Flask to expose APIs for maze generation and player movement.
+
+- **User Interaction Service**:
+  - Create `user_interaction.py` to manage user registration and login (optional for this project).
+
+- **Real-Time Updates Service**:
+  - Create `real_time_updates.py` to enable real-time updates using Flask-SocketIO (optional for this project).
+
+#### **4. Frontend Development**
+- **HTML Structure**:
+  - Create `index.html` to serve as the main game interface.
+  - Use a grid layout to represent the maze.
+
+- **CSS Styling**:
+  - Add `styles.css` for modern and responsive design.
+  - Style the maze, player, and goal cells for better visual appeal.
+
+- **JavaScript Logic**:
+  - Add `script.js` to handle player movement and integrate with backend APIs.
+  - Use `fetch` to dynamically load the maze and update the game state.
+
+#### **5. Containerization with Docker**
+- **Create Dockerfiles**:
+  - Write separate Dockerfiles for each microservice (`game-logic`, `user-interaction`, `real-time-updates`).
+  - Use Python base images and install necessary dependencies.
+
+- **Set Up Docker Compose**:
+  - Write `docker-compose.yml` to orchestrate the services.
+  - Map ports for each service to the host machine.
+
+#### **6. Running the Application**
+- **Build and Start the Containers**:
+  ```bash
+  docker-compose up --build
+  ```
+- **Access the Game**:
+  - Open [http://localhost:5000](http://localhost:5000) in a browser to play the game.
+
+#### **7. Testing and Debugging**
+- Test the maze generation to ensure a valid path exists.
+- Test player movement and game completion logic.
+- Debug any issues with containerization or API integration.
+
+#### **8. Deployment (Optional)**
+- Deploy the application to a cloud platform (e.g., AWS, Azure, or Google Cloud).
+- Use Docker images for easy deployment.
+
+---
+
+### **Key Learning Outcomes**
+1. Understand the basics of Flask and how to build RESTful APIs.
+2. Learn how to integrate a frontend with a Flask backend.
+3. Gain hands-on experience with Docker and Docker Compose.
+4. Understand the principles of microservices architecture.
+5. Learn how to validate and test a web application.
+
+---
+
+### **Additional Resources**
+- [Flask Documentation](https://flask.palletsprojects.com/)
+- [Docker Documentation](https://docs.docker.com/)
+- [HTML/CSS/JavaScript Tutorials](https://developer.mozilla.org/)
+
+---
+
+### **Suggested Exercises for Students**
+1. Modify the maze dimensions and test the game.
+2. Add a scoring system to track the number of moves.
+3. Implement user authentication in the `user_interaction` service.
+4. Enhance the maze generation algorithm for more complex mazes.
+5. Add real-time multiplayer functionality using Flask-SocketIO.

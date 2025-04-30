@@ -1,51 +1,65 @@
 pipeline {
     agent any
-    triggers {
-        githubPush()
-    }
 
     environment {
-        COMPOSE_FILE = 'docker-compose.yml'
+        DOCKER_REGISTRY = 'your-docker-registry' // Replace with your Docker registry
+        DOCKER_IMAGE_PREFIX = 'docker-learning-only-python'
     }
 
     stages {
-        stage('Clone Repository') {
+        stage('Checkout') {
             steps {
-                // Explicitly specify the branch as 'main'
-                git branch: 'maze_runner_game', url: 'https://github.com/LazyCoderForU/docker-learning-only-python.git'
+                git branch: 'main', url: 'https://github.com/your-repo-url.git'
             }
         }
 
-        stage('Set Up Python Environment') {
+        stage('Build Docker Images') {
             steps {
-                // Install dependencies using pip
-                bat 'python -m venv venv'
-                bat './venv/bin/pip install -r requirements.txt'
+                script {
+                    bat 'docker build -t %DOCKER_IMAGE_PREFIX%-game-logic -f Dockerfile.game_logic .'
+                    bat 'docker build -t %DOCKER_IMAGE_PREFIX%-user-interaction -f Dockerfile.user_interaction .'
+                    bat 'docker build -t %DOCKER_IMAGE_PREFIX%-real-time-updates -f Dockerfile.real_time_updates .'
+                }
             }
         }
 
-        stage('Rebuild Docker Containers') {
+        stage('Run Tests') {
             steps {
-                bat 'docker compose down'
-                bat 'docker compose up --build -d'
+                script {
+                    bat 'docker-compose up -d'
+                    // Add test commands here
+                    bat 'docker-compose down'
+                }
             }
         }
 
-        stage('Test Application') {
+        stage('Push to Docker Registry') {
             steps {
-                // Add test commands here (e.g., curl to test endpoints)
-                bat 'curl -f http://localhost:5100 || exit 1'
-                bat 'curl -f http://localhost:5101 || exit 1'
-                bat 'curl -f http://localhost:5102 || exit 1'
+                script {
+                    bat 'docker tag %DOCKER_IMAGE_PREFIX%-game-logic %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-game-logic'
+                    bat 'docker push %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-game-logic'
+
+                    bat 'docker tag %DOCKER_IMAGE_PREFIX%-user-interaction %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-user-interaction'
+                    bat 'docker push %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-user-interaction'
+
+                    bat 'docker tag %DOCKER_IMAGE_PREFIX%-real-time-updates %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-real-time-updates'
+                    bat 'docker push %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-real-time-updates'
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    bat 'docker-compose up -d'
+                }
             }
         }
     }
 
     post {
         always {
-            // Clean up Docker containers and resources
-            bat 'docker compose down'
-            bat 'docker system prune -f'
+            bat 'docker-compose down'
         }
     }
 }

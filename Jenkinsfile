@@ -2,18 +2,15 @@ pipeline {
     agent any
 
     environment {
-        // Optional: you can define env variables here
-        COMPOSE_FILE = 'docker-compose.yml'
+        DOCKER_REGISTRY = 'your-docker-registry' // TODO: Replace this with actual registry
+        DOCKER_IMAGE_PREFIX = 'docker-learning-only-python'
     }
 
     stages {
 
         stage('Git Clone') {
             steps {
-                checkout([$class: 'GitSCM',
-                    branches: [[name: '*/maze_runner_game']],
-                    userRemoteConfigs: [[url: 'https://github.com/LazyCoderForU/docker-learning-only-python.git']]
-                ])
+                git branch: 'maze_runner_game', url: 'https://github.com/LazyCoderForU/docker-learning-only-python.git'
             }
         }
 
@@ -29,8 +26,9 @@ pipeline {
         stage('Build and Deploy Containers') {
             steps {
                 script {
-                    echo "Building and starting containers..."
-                    bat "docker-compose up --build -d"
+                    bat 'docker-compose up -d'
+                    // Add your test commands here
+                    bat 'docker-compose down'
                 }
             }
         }

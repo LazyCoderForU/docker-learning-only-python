@@ -2,64 +2,47 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_REGISTRY = 'your-docker-registry' // TODO: Replace this with actual registry
-        DOCKER_IMAGE_PREFIX = 'docker-learning-only-python'
+        // Optional: you can define env variables here
+        COMPOSE_FILE = 'docker-compose.yml'
     }
 
     stages {
-        stage('Checkout') {
+
+        stage('Git Clone') {
             steps {
-                git branch: 'maze_runner_game', url: 'https://github.com/LazyCoderForU/docker-learning-only-python.git'
+                checkout([$class: 'GitSCM',
+                    branches: [[name: '*/maze_runner_game']],
+                    userRemoteConfigs: [[url: 'https://github.com/LazyCoderForU/docker-learning-only-python.git']]
+                ])
             }
         }
 
-        stage('Build Docker Images') {
+        stage('Docker Teardown (if running)') {
             steps {
                 script {
-                    bat 'docker build -t %DOCKER_IMAGE_PREFIX%-game-logic -f Dockerfile.game_logic .'
-                    bat 'docker build -t %DOCKER_IMAGE_PREFIX%-user-interaction -f Dockerfile.user_interaction .'
-                    bat 'docker build -t %DOCKER_IMAGE_PREFIX%-real-time-updates -f Dockerfile.real_time_updates .'
+                    echo "Tearing down existing containers..."
+                    bat "docker-compose down || exit 0"
                 }
             }
         }
 
-        stage('Run Tests') {
+        stage('Build and Deploy Containers') {
             steps {
                 script {
-                    bat 'docker-compose up -d'
-                    // Add your test commands here
-                    bat 'docker-compose down'
+                    echo "Building and starting containers..."
+                    bat "docker-compose up --build -d"
                 }
             }
         }
 
-        stage('Push to Docker Registry') {
-            steps {
-                script {
-                    bat 'docker tag %DOCKER_IMAGE_PREFIX%-game-logic %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-game-logic'
-                    bat 'docker push %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-game-logic'
-
-                    bat 'docker tag %DOCKER_IMAGE_PREFIX%-user-interaction %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-user-interaction'
-                    bat 'docker push %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-user-interaction'
-
-                    bat 'docker tag %DOCKER_IMAGE_PREFIX%-real-time-updates %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-real-time-updates'
-                    bat 'docker push %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-real-time-updates'
-                }
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                script {
-                    bat 'docker-compose up -d'
-                }
-            }
-        }
     }
 
     post {
-        always {
-            bat 'docker-compose down'
+        success {
+            echo '✅ Deployment successful!'
+        }
+        failure {
+            echo '❌ Pipeline failed.'
         }
     }
 }

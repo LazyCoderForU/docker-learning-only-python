@@ -7,23 +7,23 @@ pipeline {
     }
 
     stages {
-
-        stage('Git Clone') {
+        stage('Checkout') {
             steps {
                 git branch: 'maze_runner_game', url: 'https://github.com/LazyCoderForU/docker-learning-only-python.git'
             }
         }
 
-        stage('Docker Teardown (if running)') {
+        stage('Build Docker Images') {
             steps {
                 script {
-                    echo "Tearing down existing containers..."
-                    bat "docker-compose down || exit 0"
+                    bat 'docker build -t %DOCKER_IMAGE_PREFIX%-game-logic -f Dockerfile.game_logic .'
+                    bat 'docker build -t %DOCKER_IMAGE_PREFIX%-user-interaction -f Dockerfile.user_interaction .'
+                    bat 'docker build -t %DOCKER_IMAGE_PREFIX%-real-time-updates -f Dockerfile.real_time_updates .'
                 }
             }
         }
 
-        stage('Build and Deploy Containers') {
+        stage('Run Tests') {
             steps {
                 script {
                     bat 'docker-compose up -d'
@@ -33,14 +33,33 @@ pipeline {
             }
         }
 
+        stage('Push to Docker Registry') {
+            steps {
+                script {
+                    bat 'docker tag %DOCKER_IMAGE_PREFIX%-game-logic %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-game-logic'
+                    bat 'docker push %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-game-logic'
+
+                    bat 'docker tag %DOCKER_IMAGE_PREFIX%-user-interaction %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-user-interaction'
+                    bat 'docker push %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-user-interaction'
+
+                    bat 'docker tag %DOCKER_IMAGE_PREFIX%-real-time-updates %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-real-time-updates'
+                    bat 'docker push %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-real-time-updates'
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    bat 'docker-compose up -d'
+                }
+            }
+        }
     }
 
     post {
-        success {
-            echo '✅ Deployment successful!'
-        }
-        failure {
-            echo '❌ Pipeline failed.'
+        always {
+            bat 'docker-compose down'
         }
     }
 }

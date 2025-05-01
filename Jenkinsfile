@@ -1,65 +1,17 @@
 pipeline {
-    agent any
-
-    environment {
-        DOCKER_REGISTRY = 'your-docker-registry' // TODO: Replace this with actual registry
-        DOCKER_IMAGE_PREFIX = 'docker-learning-only-python'
-    }
+    agent any  // Use the appropriate agent, it could be a Windows node
 
     stages {
-        stage('Checkout') {
+        stage('Git Pull') {
             steps {
-                git branch: 'maze_runner_game', url: 'https://github.com/LazyCoderForU/docker-learning-only-python.git'
+                bat 'git pull'  // Using bat for Windows
             }
         }
 
-        stage('Build Docker Images') {
+        stage('Docker Compose Up') {
             steps {
-                script {
-                    bat 'docker build -t %DOCKER_IMAGE_PREFIX%-game-logic -f Dockerfile.game_logic .'
-                    bat 'docker build -t %DOCKER_IMAGE_PREFIX%-user-interaction -f Dockerfile.user_interaction .'
-                    bat 'docker build -t %DOCKER_IMAGE_PREFIX%-real-time-updates -f Dockerfile.real_time_updates .'
-                }
+                bat 'docker-compose up -d'  // Using bat for Windows
             }
-        }
-
-        stage('Run Tests') {
-            steps {
-                script {
-                    bat 'docker-compose up -d'
-                    // Add your test commands here
-                    bat 'docker-compose down'
-                }
-            }
-        }
-
-        stage('Push to Docker Registry') {
-            steps {
-                script {
-                    bat 'docker tag %DOCKER_IMAGE_PREFIX%-game-logic %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-game-logic'
-                    bat 'docker push %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-game-logic'
-
-                    bat 'docker tag %DOCKER_IMAGE_PREFIX%-user-interaction %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-user-interaction'
-                    bat 'docker push %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-user-interaction'
-
-                    bat 'docker tag %DOCKER_IMAGE_PREFIX%-real-time-updates %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-real-time-updates'
-                    bat 'docker push %DOCKER_REGISTRY%/%DOCKER_IMAGE_PREFIX%-real-time-updates'
-                }
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                script {
-                    bat 'docker-compose up -d'
-                }
-            }
-        }
-    }
-
-    post {
-        always {
-            bat 'docker-compose down'
         }
     }
 }

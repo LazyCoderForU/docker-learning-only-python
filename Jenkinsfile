@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_REGISTRY = 'your-docker-registry' // Replace with your Docker registry
+        DOCKER_REGISTRY = 'your-docker-registry' // TODO: Replace this with actual registry
         DOCKER_IMAGE_PREFIX = 'docker-learning-only-python'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/LazyCoderForU/docker-learning-only-python.git'
+                git branch: 'maze_runner_game', url: 'https://github.com/LazyCoderForU/docker-learning-only-python.git'
             }
         }
 
@@ -27,7 +27,7 @@ pipeline {
             steps {
                 script {
                     bat 'docker-compose up -d'
-                    // Add test commands here
+                    // Add your test commands here
                     bat 'docker-compose down'
                 }
             }

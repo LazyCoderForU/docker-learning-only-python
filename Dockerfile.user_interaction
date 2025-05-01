@@ -7,10 +7,10 @@ WORKDIR /app
 # Copy the current directory contents into the container
 COPY . /app
 
-# Install dependencies
+# Install dependencies required for the Flask app
 RUN pip install flask
 
-# Expose the port the app runs on
+# Expose the port the app runs on (5001)
 EXPOSE 5001
 
 # Define the command to run the application

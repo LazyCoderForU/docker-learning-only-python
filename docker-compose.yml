@@ -1,21 +1,24 @@
 services:
+  # Service for the game logic microservice
   game-logic:
     build:
-      context: .
-      dockerfile: Dockerfile.game_logic
+      context: .  # Use the current directory as the build context
+      dockerfile: Dockerfile.game_logic  # Specify the Dockerfile for game logic
     ports:
-      - "5100:5000"
+      - "5100:5000"  # Map port 5100 on the host to port 5000 in the container
 
+  # Service for the user interaction microservice
   user-interaction:
     build:
-      context: .
-      dockerfile: Dockerfile.user_interaction
+      context: .  # Use the current directory as the build context
+      dockerfile: Dockerfile.user_interaction  # Specify the Dockerfile for user interaction
     ports:
-      - "5101:5001"
+      - "5101:5001"  # Map port 5101 on the host to port 5001 in the container
 
+  # Service for the real-time updates microservice
   real-time-updates:
     build:
-      context: .
-      dockerfile: Dockerfile.real_time_updates
+      context: .  # Use the current directory as the build context
+      dockerfile: Dockerfile.real_time_updates  # Specify the Dockerfile for real-time updates
     ports:
-      - "5102:5002"
+      - "5102:5002"  # Map port 5102 on the host to port 5002 in the container
